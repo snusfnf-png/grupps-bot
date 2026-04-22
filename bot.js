@@ -1,39 +1,19 @@
-const { Bot, InlineKeyboard, Keyboard } = require("grammy");
+const { Bot, InlineKeyboard } = require("grammy");
 const http = require("http");
 
 const bot = new Bot(process.env.BOT_TOKEN);
 
-// Функция для вставки премиум эмодзи по ID
-const premiumEmoji = (id) => {
-    return {
-        type: "custom_emoji",
-        custom_emoji_id: id
-    };
-};
-
 bot.command("start", async (ctx) => {
     const text = "Scrolling plates - генератор номерных знаков\n\n• Получай крутые ежедневные награды в течение недели\n• Крути н/з своей страны со всеми регионами\n• Доступны страны: Россия, Украина, Беларусь, Казахстан\n• Украшай номерные знаки разными модификаторами и рамками\n• Создавай комнату и играй с друзьями в разные режимы\n• Меняй настройки игры под себя, выбери свою удобную тему\n• Продавай свои номера игрокам на маркетплейсе\n\nПрисоединяйся, вводи свой регион и крути номера👇";
 
-    // Кнопка Mini App под сообщением
-    const playButton = new InlineKeyboard().webApp("Играть 🎮", "https://snusfnf-png.github.io/cardrop/");
-
-    // Отправляем сообщение с Inline-кнопкой
-    await ctx.reply(text, {
-        reply_markup: playButton,
-    });
-
-    // Создаём клавиатуру в поле ввода с премиум эмодзи
-    const replyKeyboard = new Keyboard()
-        .text("Играть")
+    const keyboard = new InlineKeyboard()
+        .webApp("Играть 🎮", "https://snusfnf-png.github.io/cardrop/")
         .row()
-        .url("Наш чат", "https://t.me/chatcarzdrop")
-        .url("Наш канал", "https://t.me/carzdrop")
-        .resized()
-        .persistent();
+        .url("Наш чат 👥", "https://t.me/chatcarzdrop")
+        .url("Наш канал 📢", "https://t.me/carzdrop");
 
-    // Отправляем второе сообщение с клавиатурой (можно и в первом, но тогда кнопки смешаются)
-    await ctx.reply("👇 Меню", {
-        reply_markup: replyKeyboard,
+    await ctx.reply(text, {
+        reply_markup: keyboard,
     });
 });
 
