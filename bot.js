@@ -15,6 +15,7 @@ bot.command("start", async (ctx) => {
 • Продавай свои номера игрокам на маркетплейсе
 
 Присоединяйся, вводи свой регион и крути номера👇`;
+}
 
     // Создаем кнопку с ссылкой на Mini App
     const keyboard = new InlineKeyboard().url("Играть 🎮", "https://snusfnf-png.github.io/cardrop/");
