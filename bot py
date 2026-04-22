@@ -1,121 +1,33 @@
-#!/usr/bin/env python3
-"""
-Simple Telegram bot in one file.
 
-How to run:
-1) Create a bot in @BotFather and get the token.
-2) Set environment variable BOT_TOKEN with your token.
-3) Run: python3 bot.py
+const { Bot, InlineKeyboard } = require("grammy");
 
-Works with long polling (no external dependencies).
-"""
+// Токен берем из переменных окружения Railway
+const bot = new Bot(process.env.BOT_TOKEN);
 
-import json
-import os
-import time
-import urllib.error
-import urllib.parse
-import urllib.request
+bot.command("start", async (ctx) => {
+    const text = `Scrolling plates - генератор номерных знаков
 
-BOT_TOKEN = os.getenv("BOT_TOKEN", "").strip()
+• Получай крутые ежедневные награды в течение недели
+• Крути н/з своей страны со всеми регионами
+• Доступны страны: Россия, Украина, Беларусь, Казахстан
+• Украшай номерные знаки разными модификаторами и рамками
+• Создавай комнату и играй с друзьями в разные режимы
+• Меняй настройки игры под себя, выбери свою удобную тему
+• Продавай свои номера игрокам на маркетплейсе
 
-START_TEXT = (
-    "Scrolling plates - генератор номерных знаков\n\n"
-    "• Получай крутые ежедневные награды в течение недели\n"
-    "• Крути н/з своей страны со всеми регионами\n"
-    "• Доступны страны: Россия, Украина, Беларусь, Казахстан\n"
-    "• Украшай номерные знаки разными модификаторами и рамками\n"
-    "• Создавай комнату и играй с друзьями в разные режимы\n"
-    "• Меняй настройки игры под себя, выбери свою удобную тему\n"
-    "• Продавай свои номера игрокам на маркетплейсе\n\n"
-    "Присоединяйся, вводи свой регион и крути номера👇"
-)
+Присоединяйся, вводи свой регион и крути номера👇`;
 
+    // Создаем кнопку с ссылкой на Mini App
+    const keyboard = new InlineKeyboard().url("Играть 🎮", "https://snusfnf-png.github.io/cardrop/");
 
-class TelegramAPI:
-    def __init__(self, token: str):
-        self.base_url = f"https://api.telegram.org/bot{token}/"
+    await ctx.reply(text, {
+        reply_markup: keyboard,
+        // Опционально: можно отключить превью ссылки, чтобы было чище
+        // link_preview_options: { is_disabled: true } 
+    });
+});
 
-    def call(self, method: str, data: dict | None = None, timeout: int = 60):
-        url = self.base_url + method
-        payload = urllib.parse.urlencode(data or {}).encode("utf-8")
-        req = urllib.request.Request(url, data=payload)
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-
-    def get_updates(self, offset: int | None = None, timeout: int = 30):
-        data = {"timeout": timeout}
-        if offset is not None:
-            data["offset"] = offset
-        return self.call("getUpdates", data=data, timeout=timeout + 10)
-
-    def send_message(self, chat_id: int, text: str, reply_markup: dict | None = None):
-        data = {"chat_id": chat_id, "text": text}
-        if reply_markup is not None:
-            data["reply_markup"] = json.dumps(reply_markup, ensure_ascii=False)
-
-        return self.call(
-            "sendMessage",
-            data=data,
-            timeout=30,
-        )
-
-
-def handle_update(api: TelegramAPI, update: dict):
-    message = update.get("message") or update.get("edited_message")
-    if not message:
-        return
-
-    text = (message.get("text") or "").strip()
-    if not text:
-        return
-
-    command = text.split()[0].lower()
-    if command.startswith("/start"):
-        chat_id = message["chat"]["id"]
-        api.send_message(
-            chat_id,
-            START_TEXT,
-            reply_markup={
-                "inline_keyboard": [
-                    [
-                        {
-                            "text": "Играть 🎮",
-                            "web_app": {"url": "https://snusfnf-png.github.io/cardrop/"},
-                        }
-                    ]
-                ]
-            },
-        )
-
-
-def main():
-    if not BOT_TOKEN:
-        raise RuntimeError("Set BOT_TOKEN environment variable before запуск.")
-
-    api = TelegramAPI(BOT_TOKEN)
-    offset = None
-    print("Bot started. Waiting for updates...")
-
-    while True:
-        try:
-            updates = api.get_updates(offset=offset, timeout=30)
-            if not updates.get("ok"):
-                time.sleep(2)
-                continue
-
-            for upd in updates.get("result", []):
-                offset = upd["update_id"] + 1
-                handle_update(api, upd)
-        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError):
-            time.sleep(3)
-        except KeyboardInterrupt:
-            print("\nBot stopped.")
-            break
-        except Exception as e:
-            print(f"Unexpected error: {e}")
-            time.sleep(3)
-
-
-if __name__ == "__main__":
-    main()
+// Запуск бота (Railway сам даст порт для вебхука, но для простоты запустим long polling)
+bot.start({
+    onStart: () => console.log("Бот запущен!"),
+});
