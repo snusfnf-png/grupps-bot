@@ -1,5 +1,4 @@
-
-const { Bot, InlineKeyboard } = require("grammy");
+юconst { Bot, InlineKeyboard } = require("grammy");
 
 // Токен берем из переменных окружения Railway
 const bot = new Bot(process.env.BOT_TOKEN);
