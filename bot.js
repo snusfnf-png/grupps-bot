@@ -3,6 +3,7 @@ const http = require("http");
 
 const bot = new Bot(process.env.BOT_TOKEN);
 
+// Удаляем клавиатуру в поле ввода при старте
 bot.command("start", async (ctx) => {
     const text = "Scrolling plates - генератор номерных знаков\n\n• Получай крутые ежедневные награды в течение недели\n• Крути н/з своей страны со всеми регионами\n• Доступны страны: Россия, Украина, Беларусь, Казахстан\n• Украшай номерные знаки разными модификаторами и рамками\n• Создавай комнату и играй с друзьями в разные режимы\n• Меняй настройки игры под себя, выбери свою удобную тему\n• Продавай свои номера игрокам на маркетплейсе\n\nПрисоединяйся, вводи свой регион и крути номера👇";
 
@@ -17,6 +18,8 @@ bot.command("start", async (ctx) => {
     });
 });
 
+// Убираем обработчик текстовых сообщений, он больше не нужен
+
 const server = http.createServer((req, res) => {
     res.writeHead(200);
     res.end("Bot is running");
@@ -27,6 +30,8 @@ server.listen(PORT, () => {
     console.log("Server running on port " + PORT);
 });
 
+// Запускаем бота с защитой от двойного запуска
 bot.start({
     onStart: () => console.log("Bot started!"),
+    drop_pending_updates: true  // Это решит проблему 409 Conflict
 });
