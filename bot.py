@@ -1,7 +1,6 @@
 import io
 import os
 import random
-import string
 
 from PIL import Image, ImageDraw, ImageFont
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -78,7 +77,6 @@ RU_REGIONS = [
 RU_LETTERS = "АВЕКМНОРСТУХ"
 
 def _random_ru_plate():
-    """Генерирует случайный номер РФ: Л ЦЦЦ ЛЛ"""
     L = RU_LETTERS
     letter1  = random.choice(L)
     digits   = "".join(random.choices("0123456789", k=3))
@@ -87,7 +85,7 @@ def _random_ru_plate():
     region   = random.choice(RU_REGIONS)
     return chars, region
 
-# ── Генерация изображения (Россия) ────────────────────────────────────────────
+# ── Генерация изображения номера РФ ──────────────────────────────────────────
 
 def _dot_grid(draw, w, h):
     for x in range(0, w + 1, 20):
@@ -96,9 +94,9 @@ def _dot_grid(draw, w, h):
 
 def _ru_flag(draw, fx, fy, fw=32, fh=22):
     th = fh // 3
-    draw.rectangle([fx, fy,           fx+fw, fy+th],     fill="white", outline="#cccccc", width=1)
-    draw.rectangle([fx, fy+th,        fx+fw, fy+th*2],   fill="#003DA5")
-    draw.rectangle([fx, fy+th*2,      fx+fw, fy+fh],     fill="#CC0000")
+    draw.rectangle([fx, fy,        fx+fw, fy+th],   fill="white", outline="#cccccc", width=1)
+    draw.rectangle([fx, fy+th,     fx+fw, fy+th*2], fill="#003DA5")
+    draw.rectangle([fx, fy+th*2,   fx+fw, fy+fh],   fill="#CC0000")
 
 def generate_ru_plate_image(chars: str, region: str) -> bytes:
     W, H = 580, 290
@@ -109,8 +107,8 @@ def generate_ru_plate_image(chars: str, region: str) -> bytes:
     fnt_hdr = ImageFont.truetype(FONT_REG, 13)
     fnt_sub = ImageFont.truetype(FONT_REG, 11)
     fnt_ftr = ImageFont.truetype(FONT_REG, 12)
-    draw.text((W//2, 15), "НОМЕРА  —  CARDROP",  fill="#aaaaaa", font=fnt_hdr, anchor="mm")
-    draw.text((W//2, 29), "@cardrop_game_bot",   fill="#aaaaaa", font=fnt_sub, anchor="mm")
+    draw.text((W//2, 15), "НОМЕРА  —  CARDROP", fill="#aaaaaa", font=fnt_hdr, anchor="mm")
+    draw.text((W//2, 29), "@cardrop_game_bot",  fill="#aaaaaa", font=fnt_sub, anchor="mm")
 
     cx, cy = W//2, H//2
     pw, ph = 490, 118
@@ -139,10 +137,10 @@ def generate_ru_plate_image(chars: str, region: str) -> bytes:
 
     fw, fh = 22, 15
     fnt_rus = ImageFont.truetype(FONT_BOLD, 13)
-    rus_w = int(fnt_rus.getlength("RUS"))
-    gap = 3
+    rus_w   = int(fnt_rus.getlength("RUS"))
+    gap     = 3
     total_w = rus_w + gap + fw
-    rus_cy = rpt + int(rph * 0.82)
+    rus_cy  = rpt + int(rph * 0.82)
     tx = rcx - total_w//2
     fx = tx + rus_w + gap
     fy = rus_cy - fh//2
@@ -171,7 +169,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def handle_nz(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """В любом чате при сообщении 'нз' отправляет случайный номер России."""
+    """Только в группах при 'нз' — отправляет случайный номер России."""
     msg = update.message
     if not msg or not msg.text:
         return
@@ -190,9 +188,13 @@ async def post_init(application: Application):
 def main():
     app = Application.builder().token(BOT_TOKEN).post_init(post_init).build()
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_nz))
+
+    # Только группы и супергруппы — не ЛС
+    group_only = filters.ChatType.GROUPS & filters.TEXT & ~filters.COMMAND
+    app.add_handler(MessageHandler(group_only, handle_nz))
+
     print("Бот запущен...")
-    app.run_polling()
+    app.run_polling(allowed_updates=["message"])
 
 if __name__ == "__main__":
     main()
