@@ -23,7 +23,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             InlineKeyboardButton("Наш чат", url="https://t.me/chatcarzdrop"),
             InlineKeyboardButton("Наш канал", url="https://t.me/carzdrop"),
         ],
-        [InlineKeyboardButton("▪️", switch_inline_query_current_chat="/")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
