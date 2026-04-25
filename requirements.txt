@@ -1,5 +1,0 @@
-python-telegram-bot[webhooks]==21.6
-Pillow==10.4.0
-psycopg2-binary
-starlette
-uvicorn
